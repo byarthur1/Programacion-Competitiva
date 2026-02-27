@@ -1,0 +1,300 @@
+\documentclass[11 pt]{article}
+\usepackage[a4paper, margin = 1 in]{geometry}
+\usepackage[spanish]{babel}
+\usepackage{minted}
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+\title{Programación Competitiva}
+\author{Arturo Caballero Ortega}
+
+\begin{document}
+
+\begin{titlepage}
+
+    \centering
+    \vspace*{\fill}
+    {\Huge \textbf{Programación Competitiva} \par}
+    \vspace*{\fill}
+
+    {\Large Por: Arturo Caballero Ortega\par}
+    \vspace{1cm}
+    {\Large \today\par}
+    \vspace{2cm}
+
+\end{titlepage}
+
+\tableofcontents
+\newpage
+
+\section{Búsqueda binaria}
+
+
+A continuación un ejemplo de búsqueda binaria sobre arrays:
+
+
+\begin{minted}[frame=single, fontsize=\small, linenos]{cpp}
+int a[ll] = {/* array ordenado */};
+
+int l = 0, r = N;
+while(l < r){
+    int m = (l + r) / 2;
+    if(predicado(a[m])) l = m;
+    else r = m;
+}
+
+// l es el índice del primer elemento que cumple predicado
+\end{minted}
+
+Para el caso de trabajar con números reales, nos puede bastar con comprobar, en vez de la condición
+$l<r$, la condición $l + \varepsilon < r$, donde $\varepsilon$ es un valor muy pequeño, $1e9$ por ejemplo.
+
+\vspace{25 px}
+\section{Optimizaciones básicas}
+
+    
+Destaquemos:
+\begin{itemize}
+    \item Two pointers
+    \item Sliding window
+    \item Counting sort
+    \item Majority element
+\end{itemize}
+
+TODO: Explicarlos brevemente.
+
+\vspace{25 px}
+\section{Tecnicas de ordenación}
+
+
+Destacaremos tres problemas de ordenación.
+
+\subsection{Problema 1}
+En el primer problema tenemos una permutación de $1,2,\dots ,N$ y podemos hacer swaps de elementos consecutivos.
+El objetivo es ordenar la permutación en el menor número de swaps posible, obtener al menos el número de swaps necesarios.
+
+
+En este caso, el número de swaps necesarios es el mismo número de inversiones en la permutación. Una
+inversión es un par de elementos $a_i$ y $a_j$ tales que $i < j$ y $a_i > a_j$.\\
+Para obtener el número de inversiones podemos utilizar un algoritmo basado en mergesort, tal que:
+
+\begin{minted}[frame=single, fontsize=\small, linenos]{cpp}
+vector<int> mergesort(vector<int> & v, int l, int r){
+    if(l == r){
+        return {v[l]};
+    }
+    int m = (l+r)/2;
+    vector<int> a = mergesort(v, l, m);
+    vector<int> b = mergesort(v, m+1, r);
+    vector<int> nuevo;
+    auto it1 = a.begin(), it2 = b.begin();
+    while(it1 != a.end() && it2 != b.end()){
+        if(*it1 < *it2){
+            nuevo.push_back(*it1);
+            it1++;
+            continue;
+        }
+        nuevo.push_back(*it2);
+        inversiones += (a.end() - it1);
+        it2++;
+    }
+    while(it1 != a.end()){
+        nuevo.push_back(*it1);
+        it1++;
+    }
+    while(it2 != b.end()){
+        nuevo.push_back(*it2);
+        it2++;
+    }
+    return nuevo;
+}
+\end{minted}
+
+\subsection{Problema 2}
+En el segundo problema tenemos que obtener la mayor subsecuencia creciente de un array $v$ de tamaño $N$.
+Para este problema necesitamos definir un array auxiliar $a$. Recorreremos el array $v$ con un algoritmo
+similar al siguiente:
+
+\begin{minted}[frame=single, fontsize=\small, linenos]{cpp}
+for(int i=0; i<n; ++i){
+    auto it = lower_bound(a.begin(), a.end(), v[i]);
+    if(it == a.end()) {
+        a.push_back(v[i]);
+    }
+    else {
+        *it = v[i];
+    }
+}
+// La longitud de la mayor subsecuencia creciente es a.size()
+\end{minted}
+
+\subsection{Problema 3}
+En el tercer problema tenemos que ordenar una permutación con la posibilidad de hacer swaps de dos elementos cualesquiera. El objetivo es obtener el menor número de swaps posibles.\\
+En este problema tenemos que ver la permutación como un grafo, donde el elemento en la posición $i$ apunta al elemento en la posición $a_i$. Con esta representación, cada grafo conexo formado de tamaño $k$ necesita $k-1$ swaps para ser ordenado.
+
+
+De hecho, sea $n$ el número de elementos, $j$ el número de ciclos y $k_i$ el tamaño del ciclo $i$-ésimo.
+Entonces el número de swaps necesarios es $n-j$:
+\[ \sum_{i=1}^{j} \left( k_i - 1 \right) = \sum_{i=1}^{j} k_i - j = n - j \]
+
+\vspace{25 px}
+\section{Caminos mínimos}
+\subsection{Algoritmo de Dijkstra}
+
+\begin{minted}[frame=single, fontsize=\small, linenos]{cpp}
+for (int i = 1; i <= n; i++) distance[i] = INF;
+distance[x] = 0;
+q.push({0,x});
+while (!q.empty()) {
+    int a = q.top().second; q.pop();
+    if (processed[a]) continue;
+    processed[a] = true;
+    for (auto u : adj[a]) {
+        int b = u.first, w = u.second;
+        if (distance[a]+w < distance[b]) {
+            distance[b] = distance[a]+w;
+            q.push({-distance[b],b});
+        }
+    }
+}
+\end{minted}
+
+
+\subsection{Algoritmo de Floyd-Warshall}
+
+\begin{minted}[frame=single, fontsize=\small, linenos]{cpp}
+for (int i = 1; i <= n; i++) {
+    for (int j = 1; j <= n; j++) {
+        if (i == j) distance[i][j] = 0;
+        else if (adj[i][j]) distance[i][j] = adj[i][j];
+        else distance[i][j] = INF;
+    }
+}
+\end{minted}
+
+
+\begin{minted}[frame=single, fontsize=\small, linenos]{cpp}
+for (int k = 1; k <= n; k++) {
+    for (int i = 1; i <= n; i++) {
+        for (int j = 1; j <= n; j++) {
+            distance[i][j] = min(distance[i][j],
+            distance[i][k]+distance[k][j]);
+        }
+    }
+}
+\end{minted}
+
+\vspace{25 px}
+\section{Matemáticas}
+\subsection{Criba de Eratóstenes}
+
+\begin{minted}[frame=single, fontsize=\small, linenos]{cpp}
+int n;
+vector<bool> is_prime(n + 1, true);
+is_prime[0] = is_prime[1] = false;
+for (int i = 2; i * i <= n; i++) {
+    if (is_prime[i]) {
+        for (int j = i * i; j <= n; j += i)
+            is_prime[j] = false;
+    }
+}
+\end{minted}
+
+Para obtener la factorización de un número se puede hacer algo similar a esto:
+\begin{minted}[frame=single, fontsize=\small, linenos]{cpp}
+vector<int> max_prime (n+1);
+for(int i=0; i<n+1; ++i) max_prime[i] = i;
+for (int i = 2; i * i <= n; i++) {
+    if (max_prime [i] == i) {
+        for (int j = i + i; j <= n; j += i)
+        max_prime[j] = i;
+    }
+}
+
+vector<list<int>> a(n+1);
+for(int i=2; i<n+1; ++i){
+    vector <pair <int, int>> fact;
+    int n = i;
+    while(n != 1){
+        int p = max_prime[n];
+        n /= p;
+        if(fact.empty () || fact.back ().first != p)
+            fact.emplace_back (p, 1);
+        else fact.back ().second ++;
+    }
+
+    for(auto p : fact) a[i].push_back(p.first);
+}
+\end{minted}
+
+\subsection{Aritmética modular}
+Algunas cosas interesantes:
+
+\[ (x+y) \% m = ((x \% m) + (y \% m)) \% m \]
+\[ (x-y) \% m = ((x \% m) - (y \% m) + m) \% m \]
+\[ (x\cdot y) \% m = ((x \% m) \cdot (y \% m)) \% m \]
+\[ x^n \% m = ((x \% m)^n) \% m \]
+
+También podemos obtener el inverso modular:
+\[ \left( \frac{x}{y} \right) \% m = \left( x\%m \cdot y^{m-2} \% m \right) \text{con m primo}\]
+
+\subsection{Exponenciación rápida}
+
+\begin{minted}[frame=single, fontsize=\small, linenos]{cpp}
+int (int a, int e, int m){
+    int r = 1;
+    while(e){
+        if(e & 1) r = (r*a) % m;
+        e >>= 1;
+        a = (a*a) % m;
+    }
+    return r;
+}
+\end{minted}
+
+\subsection{Identidad de Bezout}
+Supongamos no necesitar esto gracias.
+
+\begin{minted}[frame=single, fontsize=\small, linenos]{cpp}
+constexpr array<ll, 3> egcd(ll a, ll b) {
+    ll ga = 1, g = a;
+    ll za = 0, z = b;
+    ll t, aux;
+    while (z != 0) {
+        aux = z;
+        t = g / z;
+        z = g % z;
+        g = aux;
+        aux = za;
+        za = ga - t * za;
+        ga = aux;
+    }
+    ll gb = b == 0 ? 0 : (g - ga * a) / b;
+    return {ga, gb, g};
+}
+\end{minted}
+
+\subsection{Combinatoria}
+
+Número de subconjuntos de $k$ elementos tomados de un conjunto de $n$ elementos.
+\[ \binom{n}{k} = \frac{n!}{k!(n-k)!}, \hspace{15 px} 
+\binom{n}{0} = \binom{n}{n} = 1, \hspace{15 px} \binom{n}{k} = 
+\binom{n-1}{k-1} + \binom{n-1}{k} \] 
+
+\begin{minted}[frame=single, fontsize=\small, linenos]{cpp}
+const int maxn = 100; // Replace 100 with the desired maximum value
+int C[maxn + 1][maxn + 1];
+C[0][0] = 1;
+for (int n = 1; n <= maxn; ++n) {
+    C[n][0] = C[n][n] = 1;
+    for (int k = 1; k < n; ++k)
+        C[n][k] = C[n - 1][k - 1] + C[n - 1][k];
+}
+\end{minted}
+
+\subsection{Principio de inclusión-exclusión}
+
+\[ \left\lvert \bigcup_{i=1}^n A_i \right\rvert = \sum_{i=1}^{n} \left\lvert A_i \right\rvert - \sum_{0 \le i < j \le n} \left\lvert A_i \cap A_j \right\rvert + \sum_{0 \le i < j < k \le n} \left\lvert A_i \cap A_j \cap A_k \right\rvert - \cdots + (-1)^{n-1} \left\lvert A_1 \cap A_2 \cap \cdots \cap A_n \right\rvert
+\]
+
+\end{document}
