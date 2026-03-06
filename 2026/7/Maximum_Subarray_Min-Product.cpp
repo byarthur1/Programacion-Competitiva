@@ -47,5 +47,6 @@ int maxSumMinProduct(vector<int>& nums) {
 int main(){
 
     vector<int> v = {1,2,3,2};
-    maxSumMinProduct(v);
+    cout << maxSumMinProduct(v) << endl;
+
 }
